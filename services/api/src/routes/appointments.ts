@@ -1,7 +1,7 @@
 import { Router } from "express";
 import Joi from "joi";
 import db from "../db.js";
-import { authenticate, authorize } from "../middleware/auth.js";
+import { authenticate, authorize, type AuthRequest } from "../middleware/auth.js";
 import { writeAudit } from "../middleware/audit.js";
 
 const router = Router();
@@ -20,6 +20,16 @@ const statuses = [
   "completed",
   "cancelled"
 ];
+
+const allowedTransitions: Record<string, string[]> = {
+  requested: ["scheduled", "cancelled"],
+  scheduled: ["confirmed", "cancelled"],
+  confirmed: ["checked_in", "cancelled"],
+  checked_in: ["in_progress", "cancelled"],
+  in_progress: ["completed"],
+  completed: [],
+  cancelled: []
+};
 
 const appointmentSchema = Joi.object({
   patient_id: uuidSchema.required(),
@@ -66,6 +76,21 @@ router.post("/", async (req, res) => {
       if (!clinician) {
         return res.status(400).json({
           error: "Assigned user must be an active clinician"
+        });
+      }
+    }
+
+    if (value.clinician_id) {
+      const conflict = await db("mc_appointments")
+        .where({ clinician_id: value.clinician_id })
+        .whereNot("status", "cancelled")
+        .where("scheduled_start", "<", value.scheduled_end)
+        .where("scheduled_end", ">", value.scheduled_start)
+        .first("id");
+
+      if (conflict) {
+        return res.status(409).json({
+          error: "Clinician already has an appointment during this time"
         });
       }
     }
@@ -146,6 +171,95 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+
+const visitReportSchema = Joi.object({
+  chief_complaint: Joi.string().max(5000).allow("", null),
+  clinical_notes: Joi.string().max(20000).allow("", null),
+  diagnosis: Joi.array().items(
+    Joi.object({
+      code: Joi.string().max(50).required(),
+      display: Joi.string().max(500).required(),
+      system: Joi.string().max(255).allow("", null)
+    }).unknown(false)
+  ).default([]),
+  treatment_plan: Joi.string().max(10000).allow("", null),
+  vital_signs: Joi.object().unknown(true).default({})
+}).unknown(false);
+
+router.post("/:id/report", async (req, res) => {
+  try {
+    const { error: idError } = uuidSchema.validate(req.params.id);
+    if (idError) return res.status(400).json({ error: "Invalid appointment ID" });
+
+    const { error, value } = visitReportSchema.validate(req.body, {
+      abortEarly: false
+    });
+
+    if (error) {
+      return res.status(400).json({
+        error: "Invalid visit report",
+        details: error.details.map(item => item.message)
+      });
+    }
+
+    const appointment = await db("mc_appointments")
+      .where({ id: req.params.id })
+      .first("id", "patient_id", "clinician_id");
+
+    if (!appointment) {
+      return res.status(404).json({ error: "Appointment not found" });
+    }
+
+    const actor = (req as AuthRequest).user!;
+    const clinicianId =
+      actor.role === "clinician" ? actor.id : appointment.clinician_id;
+
+    const [report] = await db("mc_visit_reports")
+      .insert({
+        ...value,
+        appointment_id: appointment.id,
+        patient_id: appointment.patient_id,
+        clinician_id: clinicianId
+      })
+      .returning("*");
+
+    await writeAudit(req, "VISIT_REPORT_CREATED", "visit_report", report.id, undefined, {
+      appointment_id: appointment.id,
+      patient_id: appointment.patient_id
+    });
+
+    return res.status(201).json({ message: "Visit report created", report });
+  } catch (err) {
+    if ((err as { code?: string }).code === "23505") {
+      return res.status(409).json({ error: "A visit report already exists for this appointment" });
+    }
+    console.error("Create visit report error:", err);
+    return res.status(500).json({ error: "Unable to create visit report" });
+  }
+});
+
+router.get("/:id/report", async (req, res) => {
+  try {
+    const { error } = uuidSchema.validate(req.params.id);
+    if (error) return res.status(400).json({ error: "Invalid appointment ID" });
+
+    const report = await db("mc_visit_reports")
+      .where({ appointment_id: req.params.id })
+      .first();
+
+    if (!report) {
+      return res.status(404).json({ error: "Visit report not found" });
+    }
+
+    await writeAudit(req, "VISIT_REPORT_VIEWED", "visit_report", report.id);
+
+    return res.status(200).json({ report });
+  } catch (err) {
+    console.error("Get visit report error:", err);
+    return res.status(500).json({ error: "Unable to retrieve visit report" });
+  }
+});
+
 router.patch("/:id/status", async (req, res) => {
   try {
     const { error: idError } = uuidSchema.validate(req.params.id);
@@ -170,6 +284,12 @@ router.patch("/:id/status", async (req, res) => {
 
     if (!appointment) {
       return res.status(404).json({ error: "Appointment not found" });
+    }
+
+    if (!allowedTransitions[appointment.status]?.includes(value.status)) {
+      return res.status(409).json({
+        error: `Invalid appointment transition: ${appointment.status} to ${value.status}`
+      });
     }
 
     const [updated] = await db("mc_appointments")
