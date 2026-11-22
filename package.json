@@ -1,0 +1,18 @@
+{
+  "name": "medicore-healthcare-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MediCore - Enterprise Healthcare Cloud Platform",
+  "workspaces": [
+    "apps/frontend",
+    "services/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace frontend",
+    "build": "npm run build --workspace frontend",
+    "health": "node -e \"console.log('MediCore environment ready')\""
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,298 @@
+.app-shell{min-height:100vh;display:flex;background:#f7f9fc;color:#182230;font-size:14px}
+.sidebar{width:245px;flex-shrink:0;background:#fff;border-right:1px solid #e8edf3;padding:25px 16px;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;font-size:21px;font-weight:750;color:#172b4d;padding:0 12px 38px}
+.brand-icon{width:32px;height:32px;border-radius:9px;background:#1769e0;color:white;display:grid;place-items:center;font-size:22px}
+.workspace-label{font-size:10px;letter-spacing:1.2px;font-weight:700;color:#98a2b3;padding:0 12px 12px}
+.tools-label{margin-top:30px}
+.sidebar nav{display:grid;gap:5px}
+.nav-item{display:flex;align-items:center;gap:13px;padding:11px 13px;border-radius:7px;color:#667085;text-decoration:none;font-weight:500}
+.nav-item span{width:18px;text-align:center;font-size:17px}
+.nav-item.active{background:#edf4ff;color:#1769e0;font-weight:650}
+.sidebar-bottom{margin-top:auto}
+.help-card{background:#f5f8fc;border:1px solid #e8edf3;border-radius:9px;padding:15px;margin:0 2px 20px}
+.help-icon{width:23px;height:23px;border-radius:50%;background:#e3edfc;color:#1769e0;display:grid;place-items:center;margin-bottom:12px}
+.help-card strong{font-size:12px}.help-card p{font-size:11px;color:#8792a2;margin-top:5px;line-height:1.5}
+.profile{border-top:1px solid #edf0f4;padding:18px 5px 0;display:flex;align-items:center;gap:10px}
+.profile strong,.profile small{display:block}.profile strong{font-size:12px}.profile small{font-size:11px;color:#98a2b3;margin-top:3px}
+.avatar{width:34px;height:34px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700}
+.admin{background:#e9effa;color:#315b9b}.profile-menu{margin-left:auto;color:#98a2b3}
+.main-content{min-width:0;flex:1;padding:0 38px;max-width:1600px;margin:0 auto}
+.topbar{height:70px;border-bottom:1px solid #e8edf3;display:flex;align-items:center;justify-content:space-between}
+.breadcrumb{color:#8792a2;font-size:12px}.breadcrumb span{padding:0 10px;color:#c1c9d3}.breadcrumb strong{color:#344054}
+.top-actions{display:flex;align-items:center;gap:20px}.system-status{font-size:11px;color:#667085}.system-status i{display:inline-block;width:7px;height:7px;background:#20b26b;border-radius:50%;margin-right:7px}
+.icon-button{border:0;background:transparent;color:#667085;font-size:19px;position:relative}.icon-button b{position:absolute;width:6px;height:6px;background:#e35b5b;border-radius:50%;right:0;top:1px}
+.page-heading{display:flex;justify-content:space-between;align-items:center;padding:30px 0 25px}
+.eyebrow{font-size:10px;letter-spacing:1.1px;color:#98a2b3;font-weight:700;margin-bottom:9px}
+h1{font-size:25px;letter-spacing:-.7px;margin:0;color:#182230}
+.subheading{color:#8792a2;font-size:12px;margin-top:7px}
+.primary-button{border:0;border-radius:7px;background:#1769e0;color:white;padding:11px 16px;font-size:12px;font-weight:650;cursor:pointer}
+.stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.stat-card,.panel{background:#fff;border:1px solid #e8edf3;border-radius:9px}
+.stat-card{padding:17px 18px}
+.stat-top{display:flex;justify-content:space-between;align-items:center;color:#667085;font-size:11px;font-weight:550}
+.stat-icon{width:31px;height:31px;border-radius:8px;display:grid;place-items:center;font-size:17px}
+.blue{background:#eaf2ff;color:#2874dc}.purple{background:#f1edff;color:#805ad5}.green{background:#e7f8ef;color:#20945b}.orange{background:#fff3e8;color:#d98232}
+.stat-card>strong{display:block;font-size:27px;letter-spacing:-.7px;margin:12px 0 6px;color:#182230}.stat-card>strong small{font-size:15px;color:#98a2b3;font-weight:500}
+.stat-card p{font-size:10px;color:#98a2b3}.positive{color:#15945b;font-weight:650}.neutral{color:#667085;font-weight:600}.warning{color:#d98232;font-weight:600}
+.content-grid{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;margin-top:18px}
+.panel{padding:19px 20px;min-width:0}
+.panel-heading{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.panel-heading h2{font-size:14px;margin:0;color:#182230;font-weight:700}
+.panel-heading p{font-size:10px;color:#98a2b3;margin-top:5px}
+.panel-heading a{font-size:10px;color:#1769e0;text-decoration:none;font-weight:600}
+.appointment-list{display:grid}
+.appointment-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #f0f2f5}
+.time{width:65px;flex-shrink:0;font-size:10px;color:#667085}
+.appointment-avatar{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:700}
+.blue-bg{background:#eaf2ff;color:#2874dc}.purple-bg{background:#f1edff;color:#805ad5}.green-bg{background:#e7f8ef;color:#20945b}.orange-bg{background:#fff3e8;color:#d98232}
+.appointment-info{min-width:0;flex:1}.appointment-info strong,.appointment-info small{display:block}.appointment-info strong{font-size:11px}.appointment-info small{font-size:9px;color:#98a2b3;margin-top:4px}
+.appointment-status,.patient-status{font-size:9px;padding:5px 8px;border-radius:20px;white-space:nowrap;font-weight:600}
+.confirmed,.stable{background:#e9f8f0;color:#16834f}.checked{background:#edf4ff;color:#2874dc}.pending,.under-review{background:#fff5e9;color:#bd7929}.critical{background:#ffeded;color:#c83e3e}
+.more{color:#98a2b3;letter-spacing:2px}
+.department{margin:21px 0}
+.department>div:first-child{display:flex;justify-content:space-between;font-size:10px;color:#667085;margin-bottom:9px}
+.department strong{font-size:10px;color:#344054}
+.progress{height:6px;border-radius:8px;background:#f0f2f5;overflow:hidden}
+.progress i{height:100%;display:block;border-radius:8px}
+.bar-blue{background:#3982e8}.bar-purple{background:#9878e8}.bar-green{background:#38b47a}.bar-orange{background:#e9a04d}
+.patients-panel{margin-top:18px}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;text-align:left;white-space:nowrap}
+th{font-size:9px;color:#98a2b3;font-weight:600;background:#fafbfd;padding:11px 10px}
+td{padding:12px 10px;border-top:1px solid #f0f2f5;font-size:10px;color:#475467}
+.patient-cell{display:flex;align-items:center;gap:9px}.patient-cell strong{font-size:10px;color:#344054}
+.patient-avatar{background:#eef2f7;color:#53657c;width:29px;height:29px}
+.muted{color:#98a2b3}
+footer{padding:22px 0;color:#98a2b3;font-size:10px;display:flex;justify-content:space-between}
+@media(max-width:1050px){.sidebar{width:205px}.main-content{padding:0 22px}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.content-grid{grid-template-columns:1fr}}
+@media(max-width:650px){.sidebar{display:none}.main-content{padding:0 15px}.topbar{height:58px}.system-status{display:none}.page-heading{align-items:flex-start;gap:15px}.page-heading h1{font-size:21px}.primary-button{white-space:nowrap;padding:10px}.stats-grid{gap:10px}.stat-card{padding:13px}.stat-card>strong{font-size:23px}.panel{padding:15px}.appointment-row{gap:8px}.time{width:55px;font-size:9px}.appointment-status{font-size:8px;padding:4px 6px}footer{gap:10px;flex-direction:column}}
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #f3f6fb;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 410px;
+  padding: 36px;
+  background: white;
+  border: 1px solid #e8edf3;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(25, 45, 75, 0.08);
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 35px;
+  font-size: 23px;
+  color: #172b4d;
+}
+
+.login-card h1 {
+  margin: 8px 0;
+  font-size: 27px;
+}
+
+.login-card label {
+  display: block;
+  margin: 19px 0 7px;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.login-card input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d8e0ea;
+  border-radius: 7px;
+  font: inherit;
+  outline-color: #1769e0;
+}
+
+.login-button {
+  width: 100%;
+  margin-top: 24px;
+  padding: 13px;
+  border: 0;
+  border-radius: 7px;
+  background: #1769e0;
+  color: white;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.login-note {
+  margin-top: 20px;
+  color: #8792a2;
+  font-size: 11px;
+  text-align: center;
+}
+
+.logout-button {
+  border: 1px solid #d8e0ea;
+  border-radius: 6px;
+  background: white;
+  color: #475467;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #f3f6fb;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 410px;
+  padding: 36px;
+  background: white;
+  border: 1px solid #e8edf3;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(25, 45, 75, 0.08);
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 35px;
+  font-size: 23px;
+  color: #172b4d;
+}
+
+.login-card h1 {
+  margin: 8px 0;
+  font-size: 27px;
+}
+
+.login-card label {
+  display: block;
+  margin: 19px 0 7px;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.login-card input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d8e0ea;
+  border-radius: 7px;
+  font: inherit;
+}
+
+.login-button {
+  width: 100%;
+  margin-top: 24px;
+  padding: 13px;
+  border: 0;
+  border-radius: 7px;
+  background: #1769e0;
+  color: white;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+}
+
+.login-note {
+  margin-top: 20px;
+  color: #8792a2;
+  font-size: 11px;
+  text-align: center;
+}
+
+.logout-button {
+  border: 1px solid #d8e0ea;
+  border-radius: 6px;
+  background: white;
+  color: #475467;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #f3f6fb;
+}
+.login-card {
+  width: 100%;
+  max-width: 410px;
+  padding: 36px;
+  background: white;
+  border: 1px solid #e8edf3;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(25,45,75,.08);
+}
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 35px;
+  font-size: 23px;
+  color: #172b4d;
+}
+.login-card h1 { margin: 8px 0; font-size: 27px; }
+.login-card label {
+  display: block;
+  margin: 19px 0 7px;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 650;
+}
+.login-card input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d8e0ea;
+  border-radius: 7px;
+  font: inherit;
+}
+.login-button {
+  width: 100%;
+  margin-top: 24px;
+  padding: 13px;
+  border: 0;
+  border-radius: 7px;
+  background: #1769e0;
+  color: white;
+  font-weight: 650;
+  cursor: pointer;
+}
+.login-button:disabled { opacity: .6; }
+.login-note {
+  margin-top: 20px;
+  color: #8792a2;
+  font-size: 11px;
+  text-align: center;
+}
+.logout-button {
+  border: 1px solid #d8e0ea;
+  border-radius: 6px;
+  background: white;
+  color: #475467;
+  padding: 8px 12px;
+  cursor: pointer;
+}
