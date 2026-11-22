@@ -122,7 +122,7 @@ The current demonstration environment uses a kubeadm Kubernetes cluster on AWS E
 - Visit-report creation and retrieval tested.
 - Visit-report diagnosis and vital-sign JSONB persistence verified.
 - Duplicate visit-report creation rejected.
-- Clinician assignment checks for visit-report access implemented.
+- Clinician assignment enforcement tested: a clinician token with a different user ID receives HTTP 403 for both report retrieval and creation.
 
 ## 10. Limitations and Future Work
 
