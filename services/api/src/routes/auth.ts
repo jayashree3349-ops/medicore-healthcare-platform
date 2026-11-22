@@ -2,12 +2,17 @@ import { Router } from "express";
 import Joi from "joi";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { createHash, randomBytes } from "node:crypto";
 import db from "../db.js";
 import { authenticate, type AuthRequest } from "../middleware/auth.js";
 import { writeAudit } from "../middleware/audit.js";
 import { decryptMfaSecret, verify } from "../utils/mfa.js";
 
 const router = Router();
+
+const hashRefreshToken = (token: string) =>
+  createHash("sha256").update(token).digest("hex");
+
 
 const registrationSchema = Joi.object({
   email: Joi.string().email().max(255).required(),
@@ -83,7 +88,7 @@ router.post("/login", async (req, res) => {
       await db("mc_users").where({ id: user.id }).update({
         failed_login_attempts: locked ? 0 : attempts,
         locked_until: locked
-          ? db.raw("NOW() + (15 * INTERVAL '1 minute')")
+          ? db.raw("NOW() + (30 * INTERVAL '1 minute')")
           : null
       });
 
@@ -118,6 +123,15 @@ router.post("/login", async (req, res) => {
       { subject: user.id, expiresIn: "15m" }
     );
 
+    const refresh_token = randomBytes(64).toString("hex");
+
+    await db("mc_refresh_tokens").insert({
+      user_id: user.id,
+      token_hash: hashRefreshToken(refresh_token),
+      expires_at: db.raw("NOW() + INTERVAL '30 days'")
+    });
+
+
     await db("mc_users").where({ id: user.id }).update({
       failed_login_attempts: 0,
       locked_until: null,
@@ -130,6 +144,7 @@ router.post("/login", async (req, res) => {
 
     return res.json({
       access_token,
+      refresh_token,
       token_type: "Bearer",
       expires_in: 900,
       user: {
@@ -143,6 +158,109 @@ router.post("/login", async (req, res) => {
   } catch (err: any) {
     console.error("Login error:", err.message);
     return res.status(500).json({ error: "Login failed" });
+  }
+});
+
+router.post("/refresh", async (req, res) => {
+  const schema = Joi.object({
+    refresh_token: Joi.string().required()
+  }).unknown(false);
+
+  const { error, value } = schema.validate(req.body);
+  if (error) return res.status(400).json({ error: "Refresh token is required" });
+
+  try {
+    const tokenHash = hashRefreshToken(value.refresh_token);
+
+    const storedToken = await db("mc_refresh_tokens")
+      .where({ token_hash: tokenHash })
+      .whereNull("revoked_at")
+      .where("expires_at", ">", db.fn.now())
+      .first();
+
+    if (!storedToken) {
+      return res.status(401).json({ error: "Invalid or expired refresh token" });
+    }
+
+    const user = await db("mc_users")
+      .where({ id: storedToken.user_id, is_active: true })
+      .first("id", "role");
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid or expired refresh token" });
+    }
+
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return res.status(500).json({ error: "Authentication is not configured" });
+    }
+
+    const access_token = jwt.sign(
+      { role: user.role },
+      secret,
+      { subject: user.id, expiresIn: "15m" }
+    );
+    const refresh_token = randomBytes(64).toString("hex");
+
+    const rotated = await db.transaction(async (trx) => {
+      const revoked = await trx("mc_refresh_tokens")
+        .where({ id: storedToken.id })
+        .whereNull("revoked_at")
+        .where("expires_at", ">", trx.fn.now())
+        .update({ revoked_at: trx.fn.now() });
+
+      if (!revoked) return false;
+
+      await trx("mc_refresh_tokens").insert({
+        user_id: user.id,
+        token_hash: hashRefreshToken(refresh_token),
+        expires_at: trx.raw("NOW() + INTERVAL '30 days'")
+      });
+
+      return true;
+    });
+
+    if (!rotated) {
+      return res.status(401).json({ error: "Refresh token has already been used" });
+    }
+
+    await writeAudit(req, "USER_TOKEN_REFRESHED", "user", user.id, user.id);
+
+    return res.json({
+      access_token,
+      refresh_token,
+      token_type: "Bearer",
+      expires_in: 900
+    });
+  } catch (err) {
+    console.error("Token refresh error:", err instanceof Error ? err.message : "Unknown error");
+    return res.status(500).json({ error: "Unable to refresh token" });
+  }
+});
+
+router.post("/logout", async (req, res) => {
+  const schema = Joi.object({
+    refresh_token: Joi.string().required()
+  }).unknown(false);
+
+  const { error, value } = schema.validate(req.body);
+  if (error) return res.status(400).json({ error: "Refresh token is required" });
+
+  try {
+    const revoked = await db("mc_refresh_tokens")
+      .where({ token_hash: hashRefreshToken(value.refresh_token) })
+      .whereNull("revoked_at")
+      .update({ revoked_at: db.fn.now() })
+      .returning(["user_id"]);
+
+    if (revoked.length) {
+      await writeAudit(req, "USER_LOGOUT", "user", revoked[0].user_id, revoked[0].user_id);
+    }
+
+    return res.json({ message: "Logout successful" });
+  } catch (err) {
+    console.error("Logout error:", err instanceof Error ? err.message : "Unknown error");
+    return res.status(500).json({ error: "Logout failed" });
   }
 });
 
