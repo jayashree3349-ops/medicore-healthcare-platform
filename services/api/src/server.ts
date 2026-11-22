@@ -32,6 +32,37 @@ const authLimiter = rateLimit({
   message: { error: "Too many authentication attempts. Please try again later." }
 });
 
+
+const requestCounts = new Map<string, number>();
+
+app.use((req, res, next) => {
+  if (req.path !== "/metrics") {
+    res.on("finish", () => {
+      const key = `${req.method}|${res.statusCode}`;
+      requestCounts.set(key, (requestCounts.get(key) || 0) + 1);
+    });
+  }
+  next();
+});
+
+app.get("/metrics", (_req, res) => {
+  const lines = [
+    "# HELP medicore_http_requests_total HTTP requests handled by MediCore",
+    "# TYPE medicore_http_requests_total counter",
+    ...Array.from(requestCounts, ([key, count]) => {
+      const [method, status] = key.split("|");
+      return `medicore_http_requests_total{method="${method}",status="${status}"} ${count}`;
+    }),
+    "# HELP medicore_process_uptime_seconds MediCore process uptime",
+    "# TYPE medicore_process_uptime_seconds gauge",
+    `medicore_process_uptime_seconds ${process.uptime()}`,
+    "# HELP medicore_process_resident_memory_bytes Resident memory in bytes",
+    "# TYPE medicore_process_resident_memory_bytes gauge",
+    `medicore_process_resident_memory_bytes ${process.memoryUsage().rss}`
+  ];
+  res.type("text/plain; version=0.0.4; charset=utf-8").send(lines.join("\n") + "\n");
+});
+
 app.use("/api", apiLimiter);
 app.use("/api/auth/login", authLimiter);
 app.use("/api/auth/register", authLimiter);
