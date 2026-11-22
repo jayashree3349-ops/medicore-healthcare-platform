@@ -211,12 +211,16 @@ router.post("/:id/report", async (req, res) => {
     }
 
     const actor = (req as AuthRequest).user!;
-    const clinicianId =
-      actor.role === "clinician" ? actor.id : appointment.clinician_id;
+    if (actor.role === "clinician" && appointment.clinician_id !== actor.id) {
+      return res.status(403).json({ error: "You can only create reports for your assigned appointments" });
+    }
+    const clinicianId = appointment.clinician_id;
 
     const [report] = await db("mc_visit_reports")
       .insert({
         ...value,
+        diagnosis: db.raw("?::jsonb", [JSON.stringify(value.diagnosis ?? [])]),
+        vital_signs: db.raw("?::jsonb", [JSON.stringify(value.vital_signs ?? {})]),
         appointment_id: appointment.id,
         patient_id: appointment.patient_id,
         clinician_id: clinicianId
@@ -249,6 +253,17 @@ router.get("/:id/report", async (req, res) => {
 
     if (!report) {
       return res.status(404).json({ error: "Visit report not found" });
+    }
+
+    const actor = (req as AuthRequest).user!;
+    if (actor.role === "clinician") {
+      const appointment = await db("mc_appointments")
+        .where({ id: req.params.id })
+        .first("clinician_id");
+
+      if (!appointment || appointment.clinician_id !== actor.id) {
+        return res.status(403).json({ error: "You can only view reports for your assigned appointments" });
+      }
     }
 
     await writeAudit(req, "VISIT_REPORT_VIEWED", "visit_report", report.id);
