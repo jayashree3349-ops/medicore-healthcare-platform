@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medicore-frontend
+  namespace: medicore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: medicore-frontend
+  template:
+    metadata:
+      labels:
+        app: medicore-frontend
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: k8s-master
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: frontend
+          image: localhost/medicore-frontend:1.0
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: medicore-frontend
+  namespace: medicore
+spec:
+  selector:
+    app: medicore-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP

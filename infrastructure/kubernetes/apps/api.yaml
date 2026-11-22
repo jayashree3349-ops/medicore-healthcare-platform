@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medicore-api
+  namespace: medicore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: medicore-api
+  template:
+    metadata:
+      labels:
+        app: medicore-api
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: k8s-master
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: api
+          image: localhost/medicore-api:1.0
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3001
+          envFrom:
+            - secretRef:
+                name: medicore-api-env
+          env:
+            - name: DB_HOST
+              value: postgres
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3001
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 768Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: medicore-api
+  namespace: medicore
+spec:
+  selector:
+    app: medicore-api
+  ports:
+    - port: 3001
+      targetPort: 3001
+  type: ClusterIP

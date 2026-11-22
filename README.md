@@ -133,3 +133,18 @@ Only synthetic demonstration data should be used. Do not store real patient info
 ## 11. License
 
 Refer to the applicable assignment and project licensing terms before redistribution.
+
+### Application Deployment Details
+
+The demonstration application is deployed on the kubeadm cluster using:
+- `infrastructure/kubernetes/apps/api.yaml` — API Deployment and ClusterIP Service.
+- `infrastructure/kubernetes/apps/frontend.yaml` — frontend Deployment and NodePort Service.
+- API container image: `localhost/medicore-api:1.0`.
+- Frontend container image: `localhost/medicore-frontend:1.0`.
+- Frontend access: `http://<EC2-public-IP>:30080`.
+- API listens on port 3001 and connects to the PostgreSQL Kubernetes Service.
+- API environment variables are supplied through the `medicore-api-env` Kubernetes Secret.
+
+Both application workloads are currently scheduled on the control-plane node because the locally imported images are available there. The frontend is exposed through NodePort 30080.
+
+This is a demonstration deployment. Images are locally imported rather than pulled from a container registry. The cluster does not currently provide production high availability, TLS termination, or an ingress controller.
