@@ -1,0 +1,20 @@
+namespace: medicore
+
+nodeSelector:
+  kubernetes.io/hostname: k8s-master
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+
+api:
+  replicas: 1
+  image: localhost/medicore-api:1.0
+  imagePullPolicy: Never
+  secretName: medicore-api-env
+
+frontend:
+  replicas: 1
+  image: localhost/medicore-frontend:1.0
+  imagePullPolicy: Never

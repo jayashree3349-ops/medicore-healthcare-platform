@@ -1,0 +1,39 @@
+name: MediCore CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build API
+        run: npm run build --workspace @medicore/api
+
+      - name: Lint frontend
+        run: npm run lint --workspace frontend
+
+      - name: Build frontend
+        run: npm run build --workspace frontend
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Validate Helm chart
+        run: helm lint infrastructure/helm/medicore

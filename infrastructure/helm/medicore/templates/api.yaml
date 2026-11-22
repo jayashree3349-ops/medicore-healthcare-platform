@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medicore-api
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels:
+      app: medicore-api
+  template:
+    metadata:
+      labels:
+        app: medicore-api
+    spec:
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      tolerations:
+        {{- toYaml .Values.tolerations | nindent 8 }}
+      containers:
+        - name: api
+          image: {{ .Values.api.image }}
+          imagePullPolicy: {{ .Values.api.imagePullPolicy }}
+          ports:
+            - containerPort: 3001
+          envFrom:
+            - secretRef:
+                name: {{ .Values.api.secretName }}
+          env:
+            - name: DB_HOST
+              value: postgres
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3001
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 768Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: medicore-api
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: medicore-api
+  ports:
+    - port: 3001
+      targetPort: 3001
+  type: ClusterIP
