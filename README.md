@@ -1,7 +1,7 @@
 # MediCore – Enterprise Healthcare Cloud Platform
 
 **Assignment:** MediCore – Enterprise Healthcare Cloud Platform
-**Author:** [Jaya Sree]
+**Author:** Jaya Sree
 
 ## 1. Problem Statement
 
@@ -108,7 +108,11 @@ Before applying manifests:
 
 The current demonstration environment uses a kubeadm Kubernetes cluster on AWS EC2, not Amazon EKS.
 
-## 9. Validation Performed
+## 9. Monitoring
+
+Prometheus is deployed in the `medicore` namespace and scrapes the API metrics endpoint at `medicore-api:3001/metrics`. The API exposes HTTP request counters and process metrics. The Prometheus target was verified as healthy. Prometheus currently uses ephemeral storage, so historical metrics are not guaranteed to survive pod recreation.
+
+## 10. Validation Performed
 
 - Frontend production build successful.
 - API TypeScript compilation successful.
@@ -124,13 +128,13 @@ The current demonstration environment uses a kubeadm Kubernetes cluster on AWS E
 - Duplicate visit-report creation rejected.
 - Clinician assignment enforcement tested: a clinician token with a different user ID receives HTTP 403 for both report retrieval and creation.
 
-## 10. Limitations and Future Work
+## 11. Limitations and Future Work
 
-This is a demonstration prototype, not a production healthcare deployment. Remaining work includes production TLS, distributed rate limiting, complete patient ownership authorization, refresh-token lifecycle, database-level concurrency protection for appointment conflicts, appointment reminder scheduling, notifications, monitoring, CI/CD, high availability, and independent FHIR conformance validation.
+This is a demonstration prototype, not a production healthcare deployment. Remaining work includes production TLS, distributed rate limiting, complete patient ownership authorization, refresh-token lifecycle, database-level concurrency protection for appointment conflicts, appointment reminder scheduling, notifications, Grafana dashboards, centralized logging, distributed tracing, CI/CD, high availability, and independent FHIR conformance validation.
 
 Only synthetic demonstration data should be used. Do not store real patient information in this prototype.
 
-## 11. License
+## 12. License
 
 Refer to the applicable assignment and project licensing terms before redistribution.
 
@@ -139,9 +143,9 @@ Refer to the applicable assignment and project licensing terms before redistribu
 The demonstration application is deployed on the kubeadm cluster using:
 - `infrastructure/kubernetes/apps/api.yaml` — API Deployment and ClusterIP Service.
 - `infrastructure/kubernetes/apps/frontend.yaml` — frontend Deployment and NodePort Service.
-- API container image: `localhost/medicore-api:1.0`.
+- API container image: `localhost/medicore-api:1.1`.
 - Frontend container image: `localhost/medicore-frontend:1.0`.
-- Frontend access: `http://<EC2-public-IP>:30080`.
+- Frontend access: `http://13.206.197.147:30080`.
 - API listens on port 3001 and connects to the PostgreSQL Kubernetes Service.
 - API environment variables are supplied through the `medicore-api-env` Kubernetes Secret.
 
