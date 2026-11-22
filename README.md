@@ -76,11 +76,15 @@ Required API configuration includes database connection settings, `JWT_SECRET`, 
 | `/api/auth/mfa` | MFA operations |
 | `/api/patients` | Patient records |
 | `/api/clinical` | Clinical records |
-| `/api/appointments` | Appointment management |
+| `/api/appointments` | Appointment management and visit reports |
 | `/api/analytics` | Analytics |
 | `/fhir/r4` | FHIR-oriented interoperability |
 
 Protected healthcare routes require authentication and appropriate staff roles.
+
+Appointment management supports a seven-state workflow: requested, scheduled, confirmed, checked in, in progress, completed, and cancelled. Invalid state transitions are rejected. A pre-insert overlap check rejects conflicting appointments for the same clinician. This check is not yet concurrency-safe at the database level.
+
+Visit reports support creation and retrieval, with one report per appointment. Clinicians are restricted to reports for their assigned appointments. Diagnosis and vital-sign data are stored as PostgreSQL JSONB.
 
 ## 7. Security Features
 
@@ -88,7 +92,7 @@ Implemented controls include password hashing, JWT authentication, TOTP MFA, rol
 
 An audit-log database trigger blocks record updates and deletes.
 
-These controls do not constitute HIPAA certification or complete regulatory compliance.
+These controls do not constitute HIPAA certification or complete regulatory compliance. Rate limiting is currently process-local, and production TLS is not configured.
 
 ## 8. Kubernetes Deployment
 
@@ -112,11 +116,17 @@ The current demonstration environment uses a kubeadm Kubernetes cluster on AWS E
 - MFA login flow tested.
 - Analytics endpoints tested.
 - Security response headers checked.
-- Audit-log immutability trigger tested.
+- Audit-log update and delete protection tested.
+- Appointment state transitions tested, including rejection of an invalid transition.
+- Clinician appointment-overlap conflict check tested.
+- Visit-report creation and retrieval tested.
+- Visit-report diagnosis and vital-sign JSONB persistence verified.
+- Duplicate visit-report creation rejected.
+- Clinician assignment checks for visit-report access implemented.
 
 ## 10. Limitations and Future Work
 
-This is a demonstration prototype, not a production healthcare deployment. Remaining work includes production TLS, distributed rate limiting, complete patient ownership authorization, refresh-token lifecycle, appointment conflict detection, notifications, monitoring, CI/CD, high availability, and independent FHIR conformance validation.
+This is a demonstration prototype, not a production healthcare deployment. Remaining work includes production TLS, distributed rate limiting, complete patient ownership authorization, refresh-token lifecycle, database-level concurrency protection for appointment conflicts, appointment reminder scheduling, notifications, monitoring, CI/CD, high availability, and independent FHIR conformance validation.
 
 Only synthetic demonstration data should be used. Do not store real patient information in this prototype.
 
